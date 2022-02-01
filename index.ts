@@ -1,7 +1,12 @@
 import os = require('os');
 import fs = require('fs');
 
+// Définition des constantes et variables générales
+const cliProgress = require('cli-progress');
 const dossierRacine:string = `E:\\TESTSBPOVH`;
+
+// Création de la progress bar avec le shades_classic theme
+const progressBarFichiers = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
 // Définition de Fonctions
 function extractDate(str:string):string[] {
@@ -85,41 +90,53 @@ function calcSecondes(str:string):string {
 // Programme principal
 
 let dossiers = fs.readdirSync(dossierRacine, {withFileTypes:true});
+let nbDossiers:number = 0;
 
 // D'abord je supprime les anciens fichiers *_resultat.csv pour repartir à zéro
 dossiers.forEach(fichier => {
-    if ((fichier.isFile) && (fichier.name.endsWith(`_resultat.csv`))) {
+    if ((fichier.isFile()) && (fichier.name.endsWith(`_resultat.csv`))) {
         fs.rmSync(`${dossierRacine}\\${fichier.name}`);
-    }
+    };
+    if (fichier.isDirectory()) {
+        // Je compte les dossiers pour la barre de progression 
+        nbDossiers++;
+    };
 })
-
+// Démarrage progressBarDossiers
+//progressBarDossiers.start(nbDossiers, 0);
 dossiers.forEach(dossier => {
     // Je parcours tout le dossier racine à la recherche des dossiers
     if (dossier.isDirectory()) {
-        console.log(`Traitement du dossier : ${dossier.name}`);
+        console.log(`\n\nTraitement du dossier : ${dossier.name}`);
         let fichiers = fs.readdirSync(`${dossierRacine}\\${dossier.name}`);
+        const nbFichiers = fichiers.length;
+        // Démarrage progressBarFichiers
+        progressBarFichiers.start(nbFichiers, 0);
         fichiers.forEach(fichier => {
             // Je traite chaque fichier du dossier
-            console.log(`Traitement du fichier : ${fichier}`); 
+            //console.log(`Traitement du fichier : ${fichier}`); 
             let resulTab:string[]=[];  
-                  let testResult:string=calcSecondes(extractTimeDL(`${dossierRacine}\\${dossier.name}\\${fichier}`));
-                  let ligneResultat:string='';
-                  const fichierResultat:string = `${dossierRacine}\\${dossier.name}_resultat.csv`;
-                  resulTab[0]=extractDate(fichier)[0];
-                  resulTab[1]=extractDate(fichier)[1];
-                  resulTab[2]=dossier.name;
-                  if (testResult == 'erreur') {
-                    resulTab[3]='FAIL';
-                    resulTab[4]='';
-                  }
-                  else
-                  {
-                    resulTab[3]='OK';
-                    resulTab[4]=testResult;
-                  }
-                  ligneResultat = `;${resulTab[0]};${resulTab[1]};;${resulTab[2]};;;;;;${resulTab[3]};;${resulTab[4]}`;
-                  //console.log(`La ligne résultat à écrire est : ${ligneResultat}`);
-                  fs.appendFileSync(fichierResultat, ligneResultat+os.EOL); 
+            let testResult:string=calcSecondes(extractTimeDL(`${dossierRacine}\\${dossier.name}\\${fichier}`));
+            let ligneResultat:string='';
+            const fichierResultat:string = `${dossierRacine}\\${dossier.name}_resultat.csv`;
+            resulTab[0]=extractDate(fichier)[0];
+            resulTab[1]=extractDate(fichier)[1];
+            resulTab[2]=dossier.name;
+            if (testResult == 'erreur') {
+            resulTab[3]='FAIL';
+            resulTab[4]='';
+            }
+            else
+            {
+            resulTab[3]='OK';
+            resulTab[4]=testResult;
+            }
+            ligneResultat = `;${resulTab[0]};${resulTab[1]};;${resulTab[2]};;;;;;${resulTab[3]};;${resulTab[4]}`;
+            //console.log(`La ligne résultat à écrire est : ${ligneResultat}`);
+            fs.appendFileSync(fichierResultat, ligneResultat+os.EOL); 
+            progressBarFichiers.increment(1);
         })
-    }   
+        progressBarFichiers.stop();
+    }
 })
+console.log(`\n\nTraitement terminé.`);

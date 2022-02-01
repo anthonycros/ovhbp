@@ -2,7 +2,11 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const os = require("os");
 const fs = require("fs");
+// Définition des constantes et variables générales
+const cliProgress = require('cli-progress');
 const dossierRacine = `E:\\TESTSBPOVH`;
+// Création de la progress bar avec le shades_classic theme
+const progressBarFichiers = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 // Définition de Fonctions
 function extractDate(str) {
     let tab = [];
@@ -88,20 +92,32 @@ function calcSecondes(str) {
 }
 // Programme principal
 let dossiers = fs.readdirSync(dossierRacine, { withFileTypes: true });
+let nbDossiers = 0;
 // D'abord je supprime les anciens fichiers *_resultat.csv pour repartir à zéro
 dossiers.forEach(fichier => {
-    if ((fichier.isFile) && (fichier.name.endsWith(`_resultat.csv`))) {
+    if ((fichier.isFile()) && (fichier.name.endsWith(`_resultat.csv`))) {
         fs.rmSync(`${dossierRacine}\\${fichier.name}`);
     }
+    ;
+    if (fichier.isDirectory()) {
+        // Je compte les dossiers pour la barre de progression 
+        nbDossiers++;
+    }
+    ;
 });
+// Démarrage progressBarDossiers
+//progressBarDossiers.start(nbDossiers, 0);
 dossiers.forEach(dossier => {
     // Je parcours tout le dossier racine à la recherche des dossiers
     if (dossier.isDirectory()) {
-        console.log(`Traitement du dossier : ${dossier.name}`);
+        console.log(`\n\nTraitement du dossier : ${dossier.name}`);
         let fichiers = fs.readdirSync(`${dossierRacine}\\${dossier.name}`);
+        const nbFichiers = fichiers.length;
+        // Démarrage progressBarFichiers
+        progressBarFichiers.start(nbFichiers, 0);
         fichiers.forEach(fichier => {
             // Je traite chaque fichier du dossier
-            console.log(`Traitement du fichier : ${fichier}`);
+            //console.log(`Traitement du fichier : ${fichier}`); 
             let resulTab = [];
             let testResult = calcSecondes(extractTimeDL(`${dossierRacine}\\${dossier.name}\\${fichier}`));
             let ligneResultat = '';
@@ -120,6 +136,9 @@ dossiers.forEach(dossier => {
             ligneResultat = `;${resulTab[0]};${resulTab[1]};;${resulTab[2]};;;;;;${resulTab[3]};;${resulTab[4]}`;
             //console.log(`La ligne résultat à écrire est : ${ligneResultat}`);
             fs.appendFileSync(fichierResultat, ligneResultat + os.EOL);
+            progressBarFichiers.increment(1);
         });
+        progressBarFichiers.stop();
     }
 });
+console.log(`\n\nTraitement terminé.`);
