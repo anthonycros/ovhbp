@@ -21,7 +21,8 @@ function extractDate(str) {
 }
 function extractTimeDL(cheminFichier) {
     const monFichier = fs.readFileSync(cheminFichier);
-    const indexDebut = monFichier.indexOf('M=') + 2;
+    //const indexDebut = monFichier.indexOf('M=')+2;
+    const indexDebut = monFichier.lastIndexOf('M=') + 2;
     // au max je récupère 9 caractères ex : 11h55m35s
     const indexfin = indexDebut + 9;
     if (indexDebut == 1) {
@@ -133,7 +134,7 @@ dossiers.forEach(dossier => {
                 resulTab[3] = 'OK';
                 resulTab[4] = testResult;
             }
-            ligneResultat = `;${resulTab[0]};${resulTab[1]};;${resulTab[2]};;;;;;${resulTab[3]};;${resulTab[4]}`;
+            ligneResultat = `;${resulTab[0]};${resulTab[1]};;;${resulTab[2]};;;;;;${resulTab[3]};;${resulTab[4]}`;
             //console.log(`La ligne résultat à écrire est : ${ligneResultat}`);
             fs.appendFileSync(fichierResultat, ligneResultat + os.EOL);
             progressBarFichiers.increment(1);
@@ -142,3 +143,9 @@ dossiers.forEach(dossier => {
     }
 });
 console.log(`\n\nTraitement terminé.`);
+// Code commenté pour tests
+// let fichierTest:string = `E:\\TESTSBPOVH\\TESTLINUXRBXVR\\DL_202112191500.log`;
+// let extractTimeDLResult:string = extractTimeDL(fichierTest);
+// let calcSecondesResult:string = calcSecondes(extractTimeDLResult);
+// console.log(`Retour de la fonction extractTimeDL : ${extractTimeDLResult}`);
+// console.log(`Retour de la fonction calcSecondes : ${calcSecondesResult}`);
