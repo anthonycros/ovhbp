@@ -22,10 +22,10 @@ function extractDate(str) {
 function extractTimeDL(cheminFichier) {
     const monFichier = fs.readFileSync(cheminFichier);
     //const indexDebut = monFichier.indexOf('M=')+2;
-    const indexDebut = monFichier.lastIndexOf('M=') + 2;
+    const indexDebut = monFichier.lastIndexOf('=') + 1;
     // au max je récupère 9 caractères ex : 11h55m35s
     const indexfin = indexDebut + 9;
-    if (indexDebut == 1) {
+    if (indexDebut == 0) {
         // on a pas trouvé la chaîne M= donc bug dans le download
         return 'erreur';
     }
@@ -143,8 +143,8 @@ dossiers.forEach(dossier => {
     }
 });
 console.log(`\n\nTraitement terminé.`);
-// Code commenté pour tests
-// let fichierTest:string = `E:\\TESTSBPOVH\\TESTLINUXRBXVR\\DL_202112191500.log`;
+//Code commenté pour tests
+// let fichierTest:string = `E:\\TESTSBPOVH\\TESTLINUXRBXVR\\DL_202202051140.log`;
 // let extractTimeDLResult:string = extractTimeDL(fichierTest);
 // let calcSecondesResult:string = calcSecondes(extractTimeDLResult);
 // console.log(`Retour de la fonction extractTimeDL : ${extractTimeDLResult}`);
